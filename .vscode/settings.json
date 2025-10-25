@@ -1,0 +1,26 @@
+{
+	"files.associations": {
+		"cursor.h": "c",
+		"main.h": "c",
+		"random": "c",
+		"atomic": "c",
+		"cmath": "c",
+		"concepts": "c",
+		"functional": "c",
+		"iterator": "c",
+		"memory_resource": "c",
+		"optional": "c",
+		"type_traits": "c",
+		"algorithm": "c",
+		"limits": "c",
+		"ostream": "c",
+		"streambuf": "c",
+		"string_view": "c",
+		"tuple": "c",
+		"typeinfo": "c",
+		"sdl.h": "c",
+		"tinyfiledialogs.h": "c",
+		"limits.h": "c",
+		"cstdint": "c"
+	}
+}

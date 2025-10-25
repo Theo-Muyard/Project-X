@@ -1,64 +1,111 @@
-// #include <SDL3/SDL.h>
-// #include <stdio.h>
+// ============================================================================================================================================================
+// ---> Includes
+// ============================================================================================================================================================
 
-// #define NAME "Project X"
-
-// int	main()
-// {
-// 	SDL_Window		*window;
-// 	SDL_Renderer	*renderer;
-// 	SDL_Event		event;
-// 	int				running;
-
-// 	printf("Programme lancé\n");
-// 	fflush(stdout);
-
-// 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
-// 	{
-// 		fprintf(stderr, "Erreur SDL_Init: %s\n", SDL_GetError());
-// 		return (1);
-// 	}
-	
-// 	window = SDL_CreateWindow(NAME, 800, 600, SDL_WINDOW_RESIZABLE);
-// 	if (!window)
-// 	{
-// 		fprintf(stderr, "Erreur SDL_CreateWindow: %s\n", SDL_GetError());
-// 		SDL_Quit();
-// 		return (1);
-// 	}
-
-// 	renderer = SDL_CreateRenderer(window, NAME);
-// 	if (!renderer)
-// 	{
-// 		fprintf(stderr, "Erreur SDL_CreateRenderer: %s\n", SDL_GetError());
-// 		SDL_DestroyWindow(window);
-// 		SDL_Quit();
-// 		return (1);
-// 	}
-
-// 	running = 1;
-// 	while (running)
-// 	{
-// 		while (SDL_PollEvent(&event))
-// 		{
-// 			if (event.type == SDL_EVENT_QUIT)
-// 			{
-// 				running = 0;
-// 			}
-// 		}
-
-// 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-// 		SDL_RenderClear(renderer);
-// 		SDL_RenderPresent(renderer);
-// 	}
-
-// 	SDL_DestroyRenderer(renderer);
-// 	SDL_DestroyWindow(window);
-// 	SDL_Quit();
-// 	return (0);
-// }
-
-#include <SDL3/SDL.h>
 #include <stdio.h>
 
-int main() { return SDL_Init(SDL_INIT_VIDEO); }
+#include "main.h"
+#include "editor.h"
+#include "utils.h"
+#include "navbar.h"
+
+int		main()
+{
+	t_AppContext	app;
+	SDL_Event		event;
+
+	SDL_FRect		tree;
+	SDL_FRect		separation;
+
+	Uint32			now;
+
+	// ============================================================================================================================================================
+	// ---> Set theme colors
+	// ============================================================================================================================================================
+
+	app.theme.background = (SDL_Color){25, 26, 31, SDL_ALPHA_OPAQUE};
+	app.theme.accent = (SDL_Color){18, 17, 17, SDL_ALPHA_OPAQUE};
+	app.theme.accent2 = (SDL_Color){19, 21, 25, SDL_ALPHA_OPAQUE};
+	app.theme.text = (SDL_Color){97, 97, 97, SDL_ALPHA_OPAQUE};
+	app.theme.cursor = (SDL_Color){159, 164, 53, SDL_ALPHA_OPAQUE};
+
+	// ============================================================================================================================================================
+	// ---> Initialisation
+	// ============================================================================================================================================================
+	
+	if (ft_app_init(&app))
+	{
+		return (1);
+	}
+
+	ft_editor_init(&app);
+	ft_navbar_init(&app);
+
+	// ============================================================================================================================================================
+	// ---> Start the app
+	// ============================================================================================================================================================
+
+	app.running = 1;
+	SDL_StartTextInput(app.window);
+
+	while (app.running)
+	{
+		SDL_GetWindowSize(app.window, &app.width, &app.height);
+		// ============================================================================================================================================================
+		// ---> Events
+		// ============================================================================================================================================================
+
+		while (SDL_PollEvent(&event))
+		{
+			if (event.type == SDL_EVENT_QUIT)
+			{
+				app.running = 0;
+			}
+			
+			ft_editor_handle_event(&app, &event);
+			ft_navbar_handle_event(&app, &event);
+		}
+
+		// ============================================================================================================================================================
+		// ---> Render
+		// ============================================================================================================================================================
+		
+		SDL_SetRenderDrawColor(app.renderer, app.theme.background.r, app.theme.background.g, app.theme.background.b, app.theme.background.a);
+		SDL_RenderClear(app.renderer);
+
+		/* === Tree part === */
+		ft_set_render_color(app.renderer, app.theme.accent2);
+
+		tree = (SDL_FRect){0, NAVBAR_H, TREE_W, app.height - NAVBAR_H};
+		SDL_RenderFillRect(app.renderer, &tree);
+
+		/* === Separation part === */
+		ft_set_render_color(app.renderer, app.theme.accent);
+
+		separation = (SDL_FRect){TREE_W, NAVBAR_H, SEPARATION_W, app.height - NAVBAR_H};
+		SDL_RenderFillRect(app.renderer, &separation);
+
+		ft_editor_update(&app, now);
+		ft_editor_render(&app);
+
+		ft_navbar_render(&app);
+
+		now = SDL_GetTicks();
+
+		// ============================================================================================================================================================
+		// ---> Update window
+		// ============================================================================================================================================================
+
+		SDL_RenderPresent(app.renderer);
+		SDL_Delay(15);
+	}
+
+	// ============================================================================================================================================================
+	// ---> Prevent memory leaks
+	// ============================================================================================================================================================
+	ft_editor_cleanup(&app);
+	ft_navbar_cleanup(&app);
+	ft_app_destroy(&app);
+	
+	return (0);
+}

@@ -1,16 +1,16 @@
-NAME	= X
-SRC		= src/main.c
+NAME	= prog
+SRC		= ${wildcard src/*.c src/**/*.c}
 OBJ		= $(SRC:.c=.o)
 
 CC		= cc
-CFLAGS	= -Wall -Wextra -Werror -I SDL/include
-LDFLAGS	= -LSDL/build -lSDL3 -lm -ldl -lpthread
+INCLUDES := $(shell find include -type d)
+CFLAGS = -Wall -Wextra -Werror $(addprefix -I , $(INCLUDES)) -I libs/SDL/include -I libs/SDL_ttf/include -I libs/tinyfiledialogs
+LDFLAGS = -L./libs/SDL/build -L./libs/SDL_ttf/build -lSDL3 -lSDL3_ttf 
 
 all: $(NAME)
 
 $(NAME): $(OBJ)
-	$(CC) $(OBJ) -o $(NAME) $(LDFLAGS)
-
+	$(CC) $(OBJ) libs/tinyfiledialogs/tinyfiledialogs.c -o $(NAME) $(LDFLAGS)
 
 clean:
 	rm -f $(OBJ)
